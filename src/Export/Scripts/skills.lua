@@ -317,7 +317,7 @@ directiveTable.skill = function(state, args, out)
 			out:write('\tcannotBeSupported = true,\n')
 		end
 	end
-	local statsPerLevel = dat("GrantedEffectStatSetsPerLevel"):GetRowList("GrantedEffect", granted)
+	local statsPerLevel = dat("GrantedEffectStatSetsPerLevel"):GetRowList("GrantedEffectStatSets", granted.GrantedEffectStatSets)
 	for indx, levelRow in ipairs(dat("GrantedEffectsPerLevel"):GetRowList("GrantedEffect", granted)) do
 		local statRow = statsPerLevel[indx]
 		local level = { extra = { }, statInterpolation = { }, cost = { } }
@@ -362,11 +362,17 @@ directiveTable.skill = function(state, args, out)
 		if levelRow.Cooldown and levelRow.Cooldown ~= 0 then
 			level.extra.cooldown = levelRow.Cooldown / 1000
 		end
+		if levelRow.PvPDamageMultiplier ~= 0 then
+			level.extra.PvPDamageMultiplier = levelRow.PvPDamageMultiplier
+		end
+		if levelRow.StoredUses ~= 0 then
+			level.extra.storedUses = levelRow.StoredUses
+		end
 		if levelRow.VaalSouls ~= 0 then
-			level.extra.soulCost = levelRow.VaalSouls
+			level.cost.Soul = levelRow.VaalSouls
 		end
 		if levelRow.VaalStoredUses ~= 0 then
-			level.extra.skillUseStorage = levelRow.VaalStoredUses
+			level.extra.vaalStoredUses = levelRow.VaalStoredUses
 		end
 		if levelRow.SoulGainPreventionDuration ~= 0 then
 			level.extra.soulPreventionDuration = levelRow.SoulGainPreventionDuration / 1000

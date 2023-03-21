@@ -17,6 +17,14 @@ local PassiveSpecClass = newClass("PassiveSpec", "UndoHandler", function(self, b
 	self.UndoHandler()
 
 	self.build = build
+
+	-- Initialise and build all tables
+	self:Init(treeVersion)
+
+	self:SelectClass(0)
+end)
+
+function PassiveSpecClass:Init(treeVersion)
 	self.treeVersion = treeVersion
 	self.tree = main:LoadTree(treeVersion)
 
@@ -57,9 +65,7 @@ local PassiveSpecClass = newClass("PassiveSpec", "UndoHandler", function(self, b
 
 	-- Keys are mastery node IDs, values are mastery effect IDs
 	self.masterySelections = { }
-
-	self:SelectClass(0)
-end)
+end
 
 function PassiveSpecClass:Load(xml, dbFileName)
 	self.title = xml.attrib.title
@@ -165,7 +171,11 @@ function PassiveSpecClass:PostLoad()
 end
 
 -- Import passive spec from the provided class IDs and node hash list
-function PassiveSpecClass:ImportFromNodeList(classId, ascendClassId, hashList, masteryEffects)
+function PassiveSpecClass:ImportFromNodeList(classId, ascendClassId, hashList, masteryEffects, treeVersion)
+	if treeVersion and treeVersion ~= self.treeVersion then
+		self:Init(treeVersion)
+		self.build.treeTab.showConvert = self.treeVersion ~= latestTreeVersion
+	end
 	self:ResetNodes()
 	self:SelectClass(classId)
 	for _, id in pairs(hashList) do
@@ -595,7 +605,7 @@ function PassiveSpecClass:SetNodeDistanceToClassStart(root)
 			end
 
 			-- Otherwise, record the distance to this node if it hasn't already been visited
-			if other.alloc and not nodeDistanceToRoot[other.id] then
+			if other.alloc and node.type ~= "Mastery" and other.type ~= "ClassStart" and other.type ~= "AscendClassStart" and not nodeDistanceToRoot[other.id] then
 				nodeDistanceToRoot[other.id] = curDist;
 
 				-- Add the other node to the end of the queue
@@ -1525,12 +1535,13 @@ function PassiveSpecClass:CreateUndoState()
 		classId = self.curClassId,
 		ascendClassId = self.curAscendClassId,
 		hashList = allocNodeIdList,
-		masteryEffects = selections
+		masteryEffects = selections,
+		treeVersion = self.treeVersion
 	}
 end
 
 function PassiveSpecClass:RestoreUndoState(state)
-	self:ImportFromNodeList(state.classId, state.ascendClassId, state.hashList, state.masteryEffects)
+	self:ImportFromNodeList(state.classId, state.ascendClassId, state.hashList, state.masteryEffects, state.treeVersion)
 	self:SetWindowTitleWithBuildClass()
 end
 

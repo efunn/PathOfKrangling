@@ -86,6 +86,7 @@ table.insert(paradoxica, "Attacks with this Weapon deal Double Damage")
 table.insert(data.uniques.generated, table.concat(paradoxica, "\n"))
 
 local caneOfKulemakMods = getVeiledMods("catarina", "weapon", "staff", "two_hand_weapon")
+local caneOfKulemakMinUnveiledModifierMagnitudes, caneOfKulemakMaxUnveiledModifierMagnitudes = 60, 90
 local caneOfKulemak = {
 	"Cane of Kulemak",
 	"Serpentine Staff",
@@ -103,10 +104,16 @@ end
 table.insert(caneOfKulemak, "Requires Level 68, 85 Str, 85 Int")
 table.insert(caneOfKulemak, "Implicits: 1")
 table.insert(caneOfKulemak, "+20% Chance to Block Attack Damage while wielding a Staff")
-table.insert(caneOfKulemak, "(60-90)% increased Unveiled Modifier magnitudes")
+table.insert(caneOfKulemak, "("..caneOfKulemakMinUnveiledModifierMagnitudes.."-"..caneOfKulemakMaxUnveiledModifierMagnitudes..")% increased Unveiled Modifier magnitudes")
 
 for index, mod in pairs(caneOfKulemakMods) do
 	for _, value in pairs(mod.veiledLines) do
+		local minValue, maxValue = value:match("%((%d+)%-(%d+)%)")
+		if minValue then
+			value = value:gsub("%(%d+%-%d+%)", "%("..tostring(math.floor(minValue*(100 + caneOfKulemakMinUnveiledModifierMagnitudes) / 100)).."%-"..tostring(math.floor(maxValue*(100 + caneOfKulemakMaxUnveiledModifierMagnitudes) / 100)).."%)")
+		elseif value == "+2 to Level of Socketed Support Gems" then
+			value = "+3 to Level of Socketed Support Gems"
+		end
 		table.insert(caneOfKulemak, "{variant:"..index.."}"..value.."")
 	end
 end
@@ -297,9 +304,9 @@ local frenzyChargeMods = {
 	[1] = {
 		["Gain on Hit"] = "10% chance to gain a Frenzy Charge on Hit",
 		["+1 Maximum"] = "+1 to Maximum Frenzy Charges",
-		["Flask Charge on Crit"] = "Gain a Flask Charge when you deal a Critical Strike while at maximum Frenzy Charges*",
+		["Flask Charge on Crit"] = "Gain a Flask Charge when you deal a Critical Strike while at maximum Frenzy Charges",
 		["Iron Reflexes"] = "You have Iron Reflexes while at maximum Frenzy Charges",
-		["Onslaught"] = "Gain Onslaught for 4 seconds on Hit while at maximum Frenzy Charges*",
+		["Onslaught"] = "Gain Onslaught for 4 seconds on Hit while at maximum Frenzy Charges",
 	},
 }
 

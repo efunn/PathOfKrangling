@@ -251,35 +251,37 @@ local ConfigTabClass = newClass("ConfigTab", "UndoHandler", "ControlHost", "Cont
 				end
 			end
 
-			local innerShown = control.shown
-			control.shown = function()
-				local shown = type(innerShown) == "boolean" and innerShown or innerShown()
-				return not shown and control.state ~= self:GetDefaultState(varData.var, type(control.state)) or shown
-			end
-			local innerLabel = control.label
-			control.label = function()
-				local shown = type(innerShown) == "boolean" and innerShown or innerShown()
-				if not shown and control.state ~= self:GetDefaultState(varData.var, type(control.state)) then
-					return "^1"..innerLabel
+			if not varData.hideIfInvalid then
+				local innerShown = control.shown
+				control.shown = function()
+					local shown = type(innerShown) == "boolean" and innerShown or innerShown()
+					return not shown and control.state ~= self:GetDefaultState(varData.var, type(control.state)) or shown
 				end
-				return innerLabel
-			end
-			local innerTooltipFunc = control.tooltipFunc
-			control.tooltipFunc = function (tooltip, ...)
-				tooltip:Clear()
-
-				if innerTooltipFunc then
-					innerTooltipFunc(tooltip, ...)
-				else
-					local tooltipText = control:GetProperty("tooltipText")
-					if tooltipText then
-						tooltip:AddLine(14, tooltipText)
+				local innerLabel = control.label
+				control.label = function()
+					local shown = type(innerShown) == "boolean" and innerShown or innerShown()
+					if not shown and control.state ~= self:GetDefaultState(varData.var, type(control.state)) then
+						return "^1"..innerLabel
 					end
+					return innerLabel
 				end
+				local innerTooltipFunc = control.tooltipFunc
+				control.tooltipFunc = function (tooltip, ...)
+					tooltip:Clear()
 
-				local shown = type(innerShown) == "boolean" and innerShown or innerShown()
-				if not shown and control.state ~= self:GetDefaultState(varData.var, type(control.state)) then
-					tooltip:AddLine(14, "^1This config option is conditional with missing source and is invalid.")
+					if innerTooltipFunc then
+						innerTooltipFunc(tooltip, ...)
+					else
+						local tooltipText = control:GetProperty("tooltipText")
+						if tooltipText then
+							tooltip:AddLine(14, tooltipText)
+						end
+					end
+
+					local shown = type(innerShown) == "boolean" and innerShown or innerShown()
+					if not shown and control.state ~= self:GetDefaultState(varData.var, type(control.state)) then
+						tooltip:AddLine(14, "^1This config option is conditional with missing source and is invalid.")
+					end
 				end
 			end
 
@@ -476,14 +478,9 @@ function ConfigTabClass:Draw(viewPort, inputEvents)
 	self:DrawControls(viewPort)
 end
 
-function ConfigTabClass:BuildModList()
-	local modList = new("ModList")
-	self.modList = modList
-	local enemyModList = new("ModList")
-	self.enemyModList = enemyModList
+function ConfigTabClass:UpdateLevel()
 	local input = self.input
 	local placeholder = self.placeholder
-	--enemy level handled here because it's needed to correctly set boss stats
 	if input.enemyLevel and input.enemyLevel > 0 then
 		self.enemyLevel = m_min(data.misc.MaxEnemyLevel, input.enemyLevel)
 	elseif placeholder.enemyLevel and placeholder.enemyLevel > 0 then
@@ -491,6 +488,16 @@ function ConfigTabClass:BuildModList()
 	else
 		self.enemyLevel = m_min(data.misc.MaxEnemyLevel, self.build.characterLevel)
 	end
+end
+
+function ConfigTabClass:BuildModList()
+	local modList = new("ModList")
+	self.modList = modList
+	local enemyModList = new("ModList")
+	self.enemyModList = enemyModList
+	local input = self.input
+	local placeholder = self.placeholder
+	self:UpdateLevel() -- enemy level handled here because it's needed to correctly set boss stats
 	for _, varData in ipairs(varList) do
 		if varData.apply then
 			if varData.type == "check" then

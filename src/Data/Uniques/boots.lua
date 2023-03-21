@@ -1,4 +1,4 @@
-﻿-- Item data (c) Grinding Gear Games
+-- Item data (c) Grinding Gear Games
 
 return {
 -- Boots: Armour
@@ -496,7 +496,7 @@ Shavronne's Gambit
 Scholar Boots
 Source: No longer obtainable
 Variant: Pre 2.6.0
-Variant: Pre 3.17.0
+Variant: Current
 Requires Level 32, 54 Int
 +10 to Dexterity
 +(20-30) to Intelligence
