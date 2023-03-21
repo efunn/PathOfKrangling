@@ -657,6 +657,7 @@ function PassiveTreeViewClass:Draw(build, viewPort, inputEvents)
 			SetDrawColor(1, 0, 0)
 			local size = 175 * scale / self.zoom ^ 0.4
 			DrawImage(self.highlightRing, scrX - size, scrY - size, size * 2, size * 2)
+			-- DrawString(scrX - size, scrY - size, "LEFT", 20, "VAR", nodeId)
 		end
 		if node == hoverNode and (node.type ~= "Socket" or not IsKeyDown("SHIFT")) and (node.type ~= "Mastery" or node.masteryEffects) and not IsKeyDown("CTRL") and not main.popups[1] then
 			-- Draw tooltip
@@ -666,6 +667,14 @@ function PassiveTreeViewClass:Draw(build, viewPort, inputEvents)
 				self:AddNodeTooltip(self.tooltip, node, build)
 			end
 			self.tooltip:Draw(m_floor(scrX - size), m_floor(scrY - size), size * 2, size * 2, viewPort)
+		end
+		if launch.devModeAlt then
+			SetDrawLayer(nil, 10000)
+			SetDrawColor(1,1,1)
+			local baseSize = 2.5
+			local size = baseSize + 0.5*baseSize*(self.zoomLevel)
+			local stringWidth = DrawStringWidth(size, "VAR", nodeId)
+			DrawString(scrX-0.5*stringWidth, scrY-0.5*size, "LEFT", size, "VAR", nodeId)
 		end
 	end
 	
